@@ -1,0 +1,69 @@
+const test = require('ava');
+import { mockSessionFromQuerySet, mockResultsFromCapturedOutput } from 'neo-forgery';
+import { cypherParams, movieOutput, movieParams, querySet } from './querySet';
+import {APP_SPEC, APP_SPEC_VARS, expectedResultForAppSpec} from './appSpecQueryInfo'
+const neo4j = require('neo4j-driver');
+
+
+const user = {
+    'id': 'f5224bcb-12d7-48d3-8943-4fa862afa1ec',
+    'roles': ['moderator'],
+};
+
+function mockDriver() {
+    const driver = neo4j.driver(
+        process.env.URI,
+        neo4j.auth.basic(
+            process.env.USER_NAME,
+            process.env.PASSWORD,
+        ),
+        { disableLosslessIntegers: true }
+    );
+    ``
+    driver.session = () => mockSessionFromQuerySet(querySet);
+    driver.verifyConnectivity = () => Promise.resolve({});
+    driver.supportsMultiDb = () => Promise.resolve(true);
+    driver.supportsTransactionConfig = () => Promise.resolve(true);
+    return driver;
+}
+
+const MOVIES = `
+query GetMovies($title: String!){
+  getMovies(title: $title){
+   title
+   released
+  }
+}
+`;
+
+test.skip('SSS [spoof simple server]', async (t: any) => {
+    const result = await server.executeOperation({
+        query: MOVIES,
+        variables: movieParams,
+    });
+    // console.log(`result=${JSON.stringify(result)}`);
+    t.true(!result.errors);
+
+    t.deepEqual(
+        // @ts-ignore
+        result.data.getMovies,
+        mockResultsFromCapturedOutput(movieOutput)
+            .records.map((record:any)=> record.get('movie').properties)
+    );
+});
+
+
+test('AppSpec Query', async (t: any) => {
+    const result = await server.executeOperation({
+        query: APP_SPEC,
+        variables: APP_SPEC_VARS,
+    });
+    t.true(!result.errors);
+
+    t.deepEqual(
+        // @ts-ignore
+        result.data.appSpec,
+        mockResultsFromCapturedOutput(expectedResultForAppSpec)
+            .records.map((record:any)=> record.get('app').properties)
+    );
+});
