@@ -1,6 +1,6 @@
-import {dataToStored, QuerySpec, storedToData} from 'neo-forgery'
+import {QuerySpec} from 'neo-forgery'
 
-const createBooksQuery = `
+const createBooksNeo4jQuery = `
 CALL {
 CREATE (this0:Book)
 SET this0.title = $this0_title
@@ -21,40 +21,40 @@ this0 { .title, .author } AS this0,
 this1 { .title, .author } AS this1
 `
 
-const createBooksParams = {
+const createBooksNeo4jParams = {
     "this0_title": "The Great Gatsby",
     "this0_author": "F. Scott Fitzgerald",
     "this1_title": "Beloved",
     "this1_author": "Toni Morrison"
 }
 
-const createBooksOutput = {
-    records:
-
-        [
-            {
-                "keys": [
-                    "this0",
-                    "this1"
-                ],
-                "length": 2,
-                "_fields": [
-                    {
-                        "title": "The Great Gatsby",
-                        "author": "F. Scott Fitzgerald"
-                    },
-                    {
-                        "title": "Beloved",
-                        "author": "Toni Morrison"
-                    }
-                ],
-                "_fieldLookup": {
-                    "this0": 0,
-                    "this1": 1
-                }
-            }
-        ]
+const wrapCopiedResponse = (copiedResponse: any) => {
+    return {records: copiedResponse }
 }
+
+const createBooksNeo4jOutput = wrapCopiedResponse([
+    {
+        "keys": [
+            "this0",
+            "this1"
+        ],
+        "length": 2,
+        "_fields": [
+            {
+                "title": "The Great Gatsby",
+                "author": "F. Scott Fitzgerald"
+            },
+            {
+                "title": "Beloved",
+                "author": "Toni Morrison"
+            }
+        ],
+        "_fieldLookup": {
+            "this0": 0,
+            "this1": 1
+        }
+    }
+])
 
 // const createBooksOutput = dataToStored([{
 //     this0: {
@@ -67,15 +67,88 @@ const createBooksOutput = {
 //     }
 // }])
 
-// console.log(`createBooksOutputOld = ${JSON.stringify(createBooksOutputOld)}`)
-// console.log(`createBooksOutput = ${JSON.stringify(createBooksOutput)}`)
-// console.log(`createBooksOutputData = ${JSON.stringify(storedToData(createBooksOutput))}`)
+
+const booksNeo4jOutput = wrapCopiedResponse(
+    [
+        {
+            "keys": [
+                "this"
+            ],
+            "length": 1,
+            "_fields": [
+                {
+                    "title": "The Awakening",
+                    "author": "Kate Chopin"
+                }
+            ],
+            "_fieldLookup": {
+                "this": 0
+            }
+        },
+        {
+            "keys": [
+                "this"
+            ],
+            "length": 1,
+            "_fields": [
+                {
+                    "title": "City of Glass",
+                    "author": "Paul Auster"
+                }
+            ],
+            "_fieldLookup": {
+                "this": 0
+            }
+        },
+        {
+            "keys": [
+                "this"
+            ],
+            "length": 1,
+            "_fields": [
+                {
+                    "title": "The Great Gatsby",
+                    "author": "F. Scott Fitzgerald"
+                }
+            ],
+            "_fieldLookup": {
+                "this": 0
+            }
+        },
+        {
+            "keys": [
+                "this"
+            ],
+            "length": 1,
+            "_fields": [
+                {
+                    "title": "Beloved",
+                    "author": "Toni Morrison"
+                }
+            ],
+            "_fieldLookup": {
+                "this": 0
+            }
+        },
+    ]
+)
+
+const booksNeo4jQuery = `
+MATCH (this:Book)
+RETURN this { .author, .title } as this
+`
 
 export const querySet: QuerySpec[] = [
     {
         name: 'createBooks',
-        query: createBooksQuery,
-        params: createBooksParams,
-        output: createBooksOutput,
-    }
+        query: createBooksNeo4jQuery,
+        params: createBooksNeo4jParams,
+        output: createBooksNeo4jOutput,
+    },
+    {
+        name: 'books',
+        query: booksNeo4jQuery,
+        params: {},
+        output: booksNeo4jOutput,
+    },
 ]
