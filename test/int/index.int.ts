@@ -55,7 +55,6 @@ test.serial('deleteBooks', async (t: any) => {
         variables: DELETE_BOOKS_PARAMS,
     });
 
-    console.log(`result.errors = ${JSON.stringify(result.errors)}`)
     t.true(result.errors === undefined);
 
     if (!result.data) throw new Error('no results for deleteBooks')

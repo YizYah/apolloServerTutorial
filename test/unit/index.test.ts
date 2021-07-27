@@ -9,6 +9,8 @@ const server: ApolloServer = newServer(context)
 
 import {CREATE_BOOKS_OUTPUT, CREATE_BOOKS_PARAMS, CREATE_BOOKS_MUTATION} from "../data/createBooks";
 import {BOOKS_PARAMS, BOOKS_QUERY} from "../data/books";
+import {UPDATE_BOOKS_MUTATION, UPDATE_BOOKS_OUTPUT, UPDATE_BOOKS_PARAMS} from "../data/updateBooks";
+import {DELETE_BOOKS_MUTATION, DELETE_BOOKS_PARAMS} from "../data/deleteBooks";
 
 
 interface Book {
@@ -34,6 +36,38 @@ test('createBooks', async (t: any) => {
         CREATE_BOOKS_OUTPUT
     );
 });
+
+test('updateBooks', async (t: any) => {
+    const result = await server.executeOperation({
+        query: UPDATE_BOOKS_MUTATION,
+        variables: UPDATE_BOOKS_PARAMS,
+    });
+
+    t.true(result.errors === undefined);
+
+    if (!result.data) throw new Error('no results for updateBooks')
+
+    t.deepEqual(
+        // @ts-ignore
+        result.data.updateBooks.books[0],
+        UPDATE_BOOKS_OUTPUT.books[0]
+    );
+});
+
+
+test('deleteBooks', async (t: any) => {
+    const result = await server.executeOperation({
+        query: DELETE_BOOKS_MUTATION,
+        variables: DELETE_BOOKS_PARAMS,
+    });
+
+    console.log(`result.errors = ${JSON.stringify(result.errors)}`)
+    t.true(result.errors === undefined);
+
+    if (!result.data) throw new Error('no results for deleteBooks')
+    t.true(result.data.deleteBooks.nodesDeleted && result.data.deleteBooks.nodesDeleted > 0);
+});
+
 
 test('books', async (t: any) => {
     const result = await server.executeOperation({
